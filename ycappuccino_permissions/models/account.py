@@ -1,8 +1,12 @@
-from ycappuccino.core.models.decorators  import Item, Property,  Reference, ItemReference, Empty
-from ycappuccino.storage.models.model import Model
-from ycappuccino.core.decorator_app import App
+from ycappuccino_core.models.decorators import Item, Property, Empty, ItemReference, Reference
+from ycappuccino_storage.models.model import Model
+from ycappuccino_core.decorator_app import App
 
 
+
+"""
+    model that decribe a account 
+"""
 
 @Empty()
 def empty():
@@ -14,7 +18,7 @@ def empty():
 
     return _empty
 
-@App(name="ycappuccino.rest-app")
+@App(name="ycappuccino_permissions")
 @Item(collection="accounts" ,name="account", plural="accounts",  secure_write=True, secure_read=True)
 @ItemReference(from_name="account", field="login" ,item="login")
 @ItemReference(from_name="account",field="role" ,item="role")

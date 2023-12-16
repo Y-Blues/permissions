@@ -1,11 +1,15 @@
 #app="all"
+"""
+    login service regarding account, login stored in database.
+
+"""
 import json
 
-from ycappuccino.core.api import IActivityLogger, IService, YCappuccino
-from ycappuccino.storage.api import IManager
-from ycappuccino.endpoints.api import IJwt
-from ycappuccino.rest_app_base.api import ILoginService
-from ycappuccino.core.decorator_app import App
+from ycappuccino_api.core.api import IActivityLogger, IService, YCappuccino
+from ycappuccino_api.storage.api import IManager
+from ycappuccino_api.endpoints.api import IRightManager
+from ycappuccino_api.permissions.api import ILoginService
+from ycappuccino_core.decorator_app import Layer
 
 import logging
 from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
@@ -15,6 +19,7 @@ import hashlib
 _logger = logging.getLogger(__name__)
 
 
+@Requires("_right_access", IRightManager.name)
 class AbsService(IService, ILoginService):
 
     def __init__(self):
@@ -23,7 +28,7 @@ class AbsService(IService, ILoginService):
         self._manager_account = None
         self._manager_role_account = None
         self._log = None
-        self._jwt = None
+        self._right_access = None
 
 
 
@@ -64,7 +69,7 @@ class AbsService(IService, ILoginService):
             result = hashlib.md5(w_concat).hexdigest()
 
             if w_login._password == result:
-                w_token = self._jwt.generate(w_account[0], w_role_account[0], w_role_permissions)
+                w_token = self._right_access.generate(w_account[0], w_role_account[0], w_role_permissions)
                 return w_token
         return None
 
@@ -74,17 +79,14 @@ class AbsService(IService, ILoginService):
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
 @Requires("_manager_role_account", IManager.name, spec_filter="'(item_id=roleAccount)'")
-@Requires("_jwt", IJwt.name)
 @Instantiate("LoginService")
-@App(name="ycappuccino.rest-app")
-
+@Layer(name="ycappuccino_permissions")
 class LoginService(AbsService):
 
     def __init__(self):
         super(LoginService, self).__init__();
         self._manager_login = None
         self._log = None
-        self._jwt = None
 
     def get_name(self):
         return "auth"
@@ -128,10 +130,8 @@ class LoginService(AbsService):
 @Provides(specifications=[IService.name, YCappuccino.name,ILoginService.name])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
-@Requires("_jwt", IJwt.name)
 @Instantiate("ChangePasswordService")
-@App(name="ycappuccino.rest-app")
-
+@Layer(name="ycappuccino_permissions")
 class ChangePasswordService(AbsService):
 
     def __init__(self):
@@ -189,17 +189,14 @@ class ChangePasswordService(AbsService):
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
 @Requires("_manager_role_account", IManager.name, spec_filter="'(item_id=roleAccount)'")
-@Requires("_jwt", IJwt.name)
 @Instantiate("LoginCookieService")
-@App(name="ycappuccino.rest-app")
-
+@Layer(name="ycappuccino.rest-app")
 class LoginCookieService(AbsService):
 
     def __init__(self):
         super(LoginCookieService, self).__init__();
         self._manager_login = None
         self._log = None
-        self._jwt = None
 
     def is_secure(self):
         return False

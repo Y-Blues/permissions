@@ -1,7 +1,9 @@
-from ycappuccino.core.models.decorators  import Item, Reference, ItemReference, Empty, Property
-from ycappuccino.storage.models.model import Model
-from ycappuccino.core.decorator_app import App
-
+from ycappuccino_core.models.decorators  import Item, Reference, ItemReference, Empty, Property
+from ycappuccino_storage.models.model import Model
+from ycappuccino_core.decorator_app import App
+"""
+    model that describe link between role and permissions
+"""
 @Empty()
 def empty():
     _empty = RolePermission()
@@ -10,7 +12,7 @@ def empty():
     _empty.rights("test")
     return _empty
 
-@App(name="ycappuccino.rest-app")
+@App(name="ycappuccino_permissions")
 @Item(collection="rolePermissions", name="rolePermission", plural="role-permissions",  secure_write=True, secure_read=True)
 @ItemReference(from_name="rolePermission", field="permission", item="permission")
 @ItemReference(from_name="rolePermission",field="role", item="role")

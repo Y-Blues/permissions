@@ -1,21 +1,24 @@
-#app="all"
-from ycappuccino.core.api import IActivityLogger, IService, YCappuccino
-from ycappuccino.storage.api import IManager
-from ycappuccino.endpoints.api import IJwt
-from ycappuccino.core.decorator_app import App
+
+"""
+    service that manage multi tenancy
+
+"""
+
+from ycappuccino_api.core.api import IActivityLogger, YCappuccino
+from ycappuccino_api.storage.api import IManager
+from ycappuccino_core.decorator_app import Layer
 
 import logging
 from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
-import hashlib
 
-from ycappuccino.rest_app_base.api import ITenantTrigger
-from ycappuccino.storage.api import ITrigger, IFilter
+from ycappuccino_api.permissions.api import ITenantTrigger
+from ycappuccino_api.storage.api import ITrigger, IFilter
 
-from ycappuccino.core.models.utils import YDict
+from ycappuccino_core.models.utils import YDict
 
-from ycappuccino.rest_app_base.models.organization import Organization
+from ycappuccino_permissions.models.organization import Organization
 
-from ycappuccino.storage.models.model import Model
+from ycappuccino_storage.models.model import Model
 
 _logger = logging.getLogger(__name__)
 
@@ -24,10 +27,8 @@ _logger = logging.getLogger(__name__)
 @Provides(specifications=[YCappuccino.name,ITenantTrigger.name, ITrigger.name, IFilter.name])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_organization_manager", IManager.name, spec_filter="'(item_id=organization)'")
-@Requires("_jwt", IJwt.name)
 @Instantiate("TenantTrigger")
-@App(name="ycappuccino.rest-app")
-
+@Layer(name="ycappuccino.rest-app")
 class TenantTrigger(ITrigger,IFilter):
 
     def __init__(self):
@@ -52,6 +53,7 @@ class TenantTrigger(ITrigger,IFilter):
                         self._organization_father[organization.father].append(organization.id)
             offset=offset+50
             has_data = len(organizations)>0
+
     def get_filter(self, a_tenant=None):
         if a_tenant is not None:
             return YDict({

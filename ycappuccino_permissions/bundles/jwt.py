@@ -1,8 +1,11 @@
-#app="all"
-from ycappuccino.core.api import IActivityLogger,  IConfiguration
-from ycappuccino.core.executor_service import ThreadPoolExecutorCallable, RunnableProcess
-from ycappuccino.endpoints.api import IJwt, IJwtRightAccess
-from ycappuccino.core.decorator_app import App
+"""
+ Service that allow to create jwt access and verify access if server is the IDP
+"""
+
+from ycappuccino_api.core.api import IActivityLogger,  IConfiguration
+from ycappuccino_core.executor_service import ThreadPoolExecutorCallable, RunnableProcess
+from ycappuccino_api.endpoints.api import IRightManager
+from ycappuccino_core.decorator_app import Layer
 import re
 import logging
 from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
@@ -37,15 +40,15 @@ class PurgeToken(RunnableProcess):
 
 
 @ComponentFactory('Jwt-Factory')
-@Provides(specifications=[IJwt.name])
+@Provides(specifications=[IRightManager.name])
 @Requires("_log",IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_config",IConfiguration.name)
 @Instantiate("jwt")
-@App(name="ycappuccino.rest-app")
-class Jwt(IJwt):
+@Layer(name="ycappuccino_permissions")
+class Jwt(IRightManager):
 
     def __init__(self):
-        super(IJwt, self).__init__();
+        super(Jwt, self).__init__();
         self._log = None
         self._key = None
         self._config = None
@@ -61,6 +64,7 @@ class Jwt(IJwt):
 
     def get_tokens_decoded(self):
         return self._token_decoded
+
     def get_token_decoded(self, a_token):
         if a_token not in self._token_decoded.keys():
             self.verify(a_token)
@@ -68,11 +72,7 @@ class Jwt(IJwt):
             return self._token_decoded[a_token]
         return  None
 
-    def get_token_subject(self, a_subsystem, a_tenant):
-        return {
-            'sub': a_subsystem,
-            "tid": a_tenant
-        }
+
     def delete_token_decoded(self, a_token):
         del self._token_decoded[a_token]
 
@@ -87,7 +87,7 @@ class Jwt(IJwt):
             "exp" : exp,
             "permissions": role_permissions[0]._dict["permissions"]
         }
-        w_token = jwt.encode(w_token_decode, self._key , algorithm='HS256')
+        w_token = jwt.encode(w_token_decode, self._key, algorithm='HS256')
 
 
         self._token_decoded[w_token] = w_token_decode
@@ -105,7 +105,6 @@ class Jwt(IJwt):
 
         return False
 
-
     def verify(self, a_token):
         if a_token is not None:
             try:
@@ -115,7 +114,7 @@ class Jwt(IJwt):
                     self._token_decoded[a_token] = w_res
 
                     return True
-                if a_token in self._token_decoded.keus():
+                if a_token in self._token_decoded.keys():
                     del self._token_decoded[a_token]
             except:
                 pass

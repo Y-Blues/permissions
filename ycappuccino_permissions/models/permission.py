@@ -1,7 +1,9 @@
-from ycappuccino.core.models.decorators  import Item, Property, Empty
-from ycappuccino.storage.models.model import Model
-from ycappuccino.core.decorator_app import App
-
+from ycappuccino_core.models.decorators  import Item, Property, Empty
+from ycappuccino_storage.models.model import Model
+from ycappuccino_core.decorator_app import App
+"""
+    model that describe a permission that should admin domain:action:filter
+"""
 @Empty()
 def empty():
     _empty = Permission()
@@ -10,7 +12,7 @@ def empty():
     _empty.permission("tout")
     return _empty
 
-@App(name="ycappuccino.rest-app")
+@App(name="ycappuccino_permissions")
 @Item(collection="permissions", name="permission", plural="permissions", secure_write=True,
       secure_read=True)
 class Permission(Model):

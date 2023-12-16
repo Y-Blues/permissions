@@ -1,9 +1,12 @@
-from ycappuccino.core.models.decorators  import Item, Property, Empty
-from ycappuccino.storage.models.model import Model
+from ycappuccino_core.models.decorators  import Item, Property, Empty
+from ycappuccino_storage.models.model import Model
+from ycappuccino_core.decorator_app import App
+
 import hashlib
 import os
-from ycappuccino.core.decorator_app import App
-
+"""
+    model that decribe a login 
+"""
 @Empty()
 def empty():
     _empty = Login()
@@ -11,7 +14,7 @@ def empty():
     _empty.password("client_pyscript_core")
     return _empty
 
-@App(name="ycappuccino.rest-app")
+@App(name="ycappuccino_permissions")
 @Item(collection="logins",name="login", plural="logins",  secure_write=True, secure_read=True)
 class Login(Model):
     def __init__(self, a_dict=None):

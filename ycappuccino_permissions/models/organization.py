@@ -1,7 +1,9 @@
-from ycappuccino.core.models.decorators  import Item, Property, Empty
-from ycappuccino.storage.models.model import Model
-from ycappuccino.core.decorator_app import App
-
+from ycappuccino_core.models.decorators  import Item, Property, Empty
+from ycappuccino_storage.models.model import Model
+from ycappuccino_core.decorator_app import App
+"""
+    model that decribe a organisation
+"""
 @Empty()
 def empty():
     _empty = Organization()
@@ -11,7 +13,7 @@ def empty():
 
     return _empty
 
-@App(name="ycappuccino.rest-app")
+@App(name="ycappuccino_permissions")
 @Item(collection="organizations", name="organization", plural="organizations",  secure_write=True, secure_read=True)
 class Organization(Model):
     def __init__(self, a_dict=None):
