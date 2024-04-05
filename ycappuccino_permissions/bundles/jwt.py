@@ -3,6 +3,7 @@
 """
 
 from ycappuccino_api.core.api import IActivityLogger,  IConfiguration
+from ycappuccino_api.proxy.api import YCappuccinoRemote
 from ycappuccino_core.executor_service import ThreadPoolExecutorCallable, RunnableProcess
 from ycappuccino_api.endpoints.api import IRightManager
 from ycappuccino_core.decorator_app import Layer
@@ -40,9 +41,9 @@ class PurgeToken(RunnableProcess):
 
 
 @ComponentFactory('Jwt-Factory')
-@Provides(specifications=[IRightManager.name])
+@Provides(specifications=[YCappuccinoRemote.__name__, IRightManager.__name__])
 @Requires("_log",IActivityLogger.name, spec_filter="'(name=main)'")
-@Requires("_config",IConfiguration.name)
+@Requires("_config",IConfiguration.__name__)
 @Instantiate("jwt")
 @Layer(name="ycappuccino_permissions")
 class Jwt(IRightManager):

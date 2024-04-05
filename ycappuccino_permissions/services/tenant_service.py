@@ -4,7 +4,8 @@
 
 """
 
-from ycappuccino_api.core.api import IActivityLogger, YCappuccino
+from ycappuccino_api.core.api import IActivityLogger
+from ycappuccino_api.proxy.api import YCappuccinoRemote
 from ycappuccino_api.storage.api import IManager
 from ycappuccino_core.decorator_app import Layer
 
@@ -24,7 +25,7 @@ _logger = logging.getLogger(__name__)
 
 
 @ComponentFactory('TenantTrigger-Factory')
-@Provides(specifications=[YCappuccino.name,ITenantTrigger.name, ITrigger.name, IFilter.name])
+@Provides(specifications=[YCappuccinoRemote.__name__, ITenantTrigger.__name__, ITrigger.name, IFilter.__name__])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_organization_manager", IManager.name, spec_filter="'(item_id=organization)'")
 @Instantiate("TenantTrigger")

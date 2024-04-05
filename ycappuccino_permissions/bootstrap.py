@@ -5,7 +5,8 @@
 
 """
 
-from ycappuccino_api.core.api import IActivityLogger,  YCappuccino
+from ycappuccino_api.core.api import IActivityLogger
+from ycappuccino_api.proxy.api import YCappuccinoRemote
 from ycappuccino_api.storage.api import IManager, IBootStrap
 from ycappuccino_core.decorator_app import Layer
 
@@ -23,13 +24,13 @@ _logger = logging.getLogger(__name__)
 
 
 @ComponentFactory('AccountBootStrap-Factory')
-@Provides(specifications=[IBootStrap.name, YCappuccino.name])
-@Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
-@Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
-@Requires("_manager_role_permission", IManager.name, spec_filter="'(item_id=rolePermission)'")
-@Requires("_manager_role_account", IManager.name, spec_filter="'(item_id=roleAccount)'")
-@Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
-@Requires("_manager_role", IManager.name, spec_filter="'(item_id=role)'")
+@Provides(specifications=[YCappuccinoRemote.__name__, IBootStrap.__name__])
+@Requires("_log", IActivityLogger.__name__, spec_filter="'(name=main)'")
+@Requires("_manager_account", IManager.__name__, spec_filter="'(item_id=account)'")
+@Requires("_manager_role_permission", IManager.__name__, spec_filter="'(item_id=rolePermission)'")
+@Requires("_manager_role_account", IManager.__name__, spec_filter="'(item_id=roleAccount)'")
+@Requires("_manager_login", IManager.__name__, spec_filter="'(item_id=login)'")
+@Requires("_manager_role", IManager.__name__, spec_filter="'(item_id=role)'")
 @Property("_id", "id", "core")
 @Instantiate("AccountBootStrap")
 @Layer(name="ycappuccino_permissions")

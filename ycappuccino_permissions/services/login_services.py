@@ -5,7 +5,8 @@
 """
 import json
 
-from ycappuccino_api.core.api import IActivityLogger, IService, YCappuccino
+from ycappuccino_api.core.api import IActivityLogger, IService
+from ycappuccino_api.proxy.api import YCappuccinoRemote
 from ycappuccino_api.storage.api import IManager
 from ycappuccino_api.endpoints.api import IRightManager
 from ycappuccino_api.permissions.api import ILoginService
@@ -19,7 +20,7 @@ import hashlib
 _logger = logging.getLogger(__name__)
 
 
-@Requires("_right_access", IRightManager.name)
+@Requires("_right_access", IRightManager.__name__)
 class AbsService(IService, ILoginService):
 
     def __init__(self):
@@ -74,7 +75,7 @@ class AbsService(IService, ILoginService):
         return None
 
 @ComponentFactory('LoginService-Factory')
-@Provides(specifications=[IService.name, YCappuccino.name,ILoginService.name])
+@Provides(specifications=[YCappuccinoRemote.__name__, IService.name,ILoginService.__name__])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
@@ -127,7 +128,7 @@ class LoginService(AbsService):
 
 
 @ComponentFactory('ChangePasswordService-Factory')
-@Provides(specifications=[IService.name, YCappuccino.name,ILoginService.name])
+@Provides(specifications=[YCappuccinoRemote.name, IService.name,ILoginService.__name__])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Instantiate("ChangePasswordService")
@@ -184,7 +185,7 @@ class ChangePasswordService(AbsService):
 
 
 @ComponentFactory('LoginCookieService-Factory')
-@Provides(specifications=[IService.name, YCappuccino.name,ILoginService.name])
+@Provides(specifications=[YCappuccinoRemote.name, IService.name,ILoginService.__name__])
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
