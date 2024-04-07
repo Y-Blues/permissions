@@ -1,4 +1,4 @@
-from src.main.python.models.decorators import (
+from ycappuccino.permissions.models import (
     Item,
     Reference,
     ItemReference,

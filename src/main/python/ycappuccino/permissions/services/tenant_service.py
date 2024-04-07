@@ -21,7 +21,7 @@ from pelix.ipopo.decorators import (
 from ycappuccino_api.permissions.api import ITenantTrigger
 from ycappuccino_api.storage.api import ITrigger, IFilter
 
-from src.main.python.models.utils import YDict
+from ycappuccino.permissions.models import YDict
 
 from ycappuccino_permissions import Organization
 

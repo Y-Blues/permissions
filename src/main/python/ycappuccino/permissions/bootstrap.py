@@ -20,11 +20,11 @@ from pelix.ipopo.decorators import (
     Instantiate,
 )
 
-from src.main.python.models.account import Account
+from src.main.python import Account
 from ycappuccino_permissions import Login
 from ycappuccino_permissions import Role
-from src.main.python.models.role_permission import RolePermission
-from src.main.python.models.role_account import RoleAccount
+from ycappuccino.permissions.models.role_permission import RolePermission
+from src.main.python import RoleAccount
 
 
 _logger = logging.getLogger(__name__)
