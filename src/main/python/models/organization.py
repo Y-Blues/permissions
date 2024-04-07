@@ -1,9 +1,12 @@
-from ycappuccino_core.models.decorators  import Item, Property, Empty
-from ycappuccino_storage.models.model import Model
-from ycappuccino_core.decorator_app import App
+from src.main.python.models.decorators import Item, Property, Empty
+from ycappuccino_storage import Model
+from src.main.python.decorator_app import App
+
 """
     model that decribe a organisation
 """
+
+
 @Empty()
 def empty():
     _empty = Organization()
@@ -13,8 +16,15 @@ def empty():
 
     return _empty
 
+
 @App(name="ycappuccino_permissions")
-@Item(collection="organizations", name="organization", plural="organizations",  secure_write=True, secure_read=True)
+@Item(
+    collection="organizations",
+    name="organization",
+    plural="organizations",
+    secure_write=True,
+    secure_read=True,
+)
 class Organization(Model):
     def __init__(self, a_dict=None):
         super().__init__(a_dict)
@@ -33,7 +43,6 @@ class Organization(Model):
     @Property(name="comment")
     def comment(self, a_value):
         self._comment = a_value
-
 
 
 empty()

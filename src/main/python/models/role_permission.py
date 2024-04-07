@@ -1,9 +1,18 @@
-from ycappuccino_core.models.decorators  import Item, Reference, ItemReference, Empty, Property
-from ycappuccino_storage.models.model import Model
-from ycappuccino_core.decorator_app import App
+from src.main.python.models.decorators import (
+    Item,
+    Reference,
+    ItemReference,
+    Empty,
+    Property,
+)
+from ycappuccino_storage import Model
+from src.main.python.decorator_app import App
+
 """
     model that describe link between role and permissions
 """
+
+
 @Empty()
 def empty():
     _empty = RolePermission()
@@ -12,10 +21,17 @@ def empty():
     _empty.rights("test")
     return _empty
 
+
 @App(name="ycappuccino_permissions")
-@Item(collection="rolePermissions", name="rolePermission", plural="role-permissions",  secure_write=True, secure_read=True)
+@Item(
+    collection="rolePermissions",
+    name="rolePermission",
+    plural="role-permissions",
+    secure_write=True,
+    secure_read=True,
+)
 @ItemReference(from_name="rolePermission", field="permission", item="permission")
-@ItemReference(from_name="rolePermission",field="role", item="role")
+@ItemReference(from_name="rolePermission", field="role", item="role")
 class RolePermission(Model):
     def __init__(self, a_dict=None):
         super().__init__(a_dict)
@@ -29,9 +45,8 @@ class RolePermission(Model):
 
     @Property(name="permissions")
     def rights(self, a_values):
-        """ list of right permission """
+        """list of right permission"""
         self._permissions = a_values
-
 
 
 empty()

@@ -1,11 +1,13 @@
-from ycappuccino_core.models.decorators  import Item, Property, Empty
-from ycappuccino_storage.models.model import Model
-from ycappuccino_core.decorator_app import App
+from src.main.python.models.decorators import Item, Property, Empty
+from ycappuccino_storage import Model
+from src.main.python.decorator_app import App
 
 """
     TODO need to be move in another packages
     model that decribe a media that can be store in a server and link to a model entity 
 """
+
+
 @Empty()
 def empty():
     _empty = Media()
@@ -17,9 +19,16 @@ def empty():
 
     return _empty
 
+
 @App(name="ycappuccino_permissions")
-@Item(collection="medias", name="media", plural="medias", secure_write=True, secure_read=True,
-      multipart="path")
+@Item(
+    collection="medias",
+    name="media",
+    plural="medias",
+    secure_write=True,
+    secure_read=True,
+    multipart="path",
+)
 class Media(Model):
     def __init__(self, a_dict=None):
         super().__init__(a_dict)

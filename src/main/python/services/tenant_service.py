@@ -1,68 +1,92 @@
-
 """
     service that manage multi tenancy
 
 """
 
 from ycappuccino_api.core.api import IActivityLogger
-from ycappuccino_api.proxy.api import YCappuccinoRemote
+from src.main.python.proxy import YCappuccinoRemote
 from ycappuccino_api.storage.api import IManager
-from ycappuccino_core.decorator_app import Layer
+from src.main.python.decorator_app import Layer
 
 import logging
-from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
+from pelix.ipopo.decorators import (
+    ComponentFactory,
+    Requires,
+    Validate,
+    Invalidate,
+    Provides,
+    Instantiate,
+)
 
 from ycappuccino_api.permissions.api import ITenantTrigger
 from ycappuccino_api.storage.api import ITrigger, IFilter
 
-from ycappuccino_core.models.utils import YDict
+from src.main.python.models.utils import YDict
 
-from ycappuccino_permissions.models.organization import Organization
+from ycappuccino_permissions import Organization
 
-from ycappuccino_storage.models.model import Model
+from ycappuccino_storage import Model
 
 _logger = logging.getLogger(__name__)
 
 
-@ComponentFactory('TenantTrigger-Factory')
-@Provides(specifications=[YCappuccinoRemote.__name__, ITenantTrigger.__name__, ITrigger.name, IFilter.__name__])
+@ComponentFactory("TenantTrigger-Factory")
+@Provides(
+    specifications=[
+        YCappuccinoRemote.__name__,
+        ITenantTrigger.__name__,
+        ITrigger.name,
+        IFilter.__name__,
+    ]
+)
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
-@Requires("_organization_manager", IManager.name, spec_filter="'(item_id=organization)'")
+@Requires(
+    "_organization_manager", IManager.name, spec_filter="'(item_id=organization)'"
+)
 @Instantiate("TenantTrigger")
 @Layer(name="ycappuccino.rest-app")
-class TenantTrigger(ITrigger,IFilter):
+class TenantTrigger(ITrigger, IFilter):
 
     def __init__(self):
-        super(TenantTrigger, self).__init__("tenantTrigger", "organization",["upsert","delete"], a_synchronous=True, a_post=True);
+        super(TenantTrigger, self).__init__(
+            "tenantTrigger",
+            "organization",
+            ["upsert", "delete"],
+            a_synchronous=True,
+            a_post=True,
+        )
         self._organization = {}
         self._organization_father = {}
         self._log = None
         self._organization_manager = None
 
-
     def _load_tenant_tree(self):
         offset = 0
         has_data = True
         while has_data:
-            organizations  = self._organization_manager.get_many("organization",{"size":50,"offset":offset})
+            organizations = self._organization_manager.get_many(
+                "organization", {"size": 50, "offset": offset}
+            )
             if organizations is not None and len(organizations) > 0:
                 for organization in organizations:
                     self._organization[organization.id] = organization
                     if organization.father not in self._organization_father.keys():
-                        self._organization_father[organization.father] = [organization.id]
+                        self._organization_father[organization.father] = [
+                            organization.id
+                        ]
                     else:
-                        self._organization_father[organization.father].append(organization.id)
-            offset=offset+50
-            has_data = len(organizations)>0
+                        self._organization_father[organization.father].append(
+                            organization.id
+                        )
+            offset = offset + 50
+            has_data = len(organizations) > 0
 
     def get_filter(self, a_tenant=None):
         if a_tenant is not None:
-            return YDict({
-                "key":"_tid",
-                "value":{
-                    "$in":self.get_sons_tenant(a_tenant)
-                }
-            })
+            return YDict(
+                {"key": "_tid", "value": {"$in": self.get_sons_tenant(a_tenant)}}
+            )
+
     def get_sons_tenant(self, a_id):
         res = [a_id]
         self._get_sons_tenant(a_id, res)
@@ -72,12 +96,11 @@ class TenantTrigger(ITrigger,IFilter):
         if a_id in self._organization_father.keys():
             for w_id in self._organization_father[a_id]:
                 a_res.append(w_id)
-                self._get_sons_tenant(w_id,a_res)
-
+                self._get_sons_tenant(w_id, a_res)
 
     def execute(self, a_action, organization):
         w_org = organization
-        if isinstance(w_org,Model):
+        if isinstance(w_org, Model):
             w_org = w_org.__dict__
         if a_action == "delete":
             del self._organization[w_org["_id"]]
@@ -90,7 +113,6 @@ class TenantTrigger(ITrigger,IFilter):
             else:
                 self._organization_father[w_org["_father"]].append(w_org["_id"])
 
-
     @Validate
     def validate(self, context):
         self._log.info("TenantService validating")
@@ -101,7 +123,7 @@ class TenantTrigger(ITrigger,IFilter):
             w_organization.name("system organization")
 
             self._organization_manager.up_sert_model(w_organization._id, w_organization)
-            self.execute("upsert",w_organization)
+            self.execute("upsert", w_organization)
         self._log.info("TenantService validated")
 
     @Invalidate

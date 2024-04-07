@@ -1,9 +1,12 @@
-from ycappuccino_core.models.decorators  import Item, Reference, ItemReference, Empty
-from ycappuccino_storage.models.model import Model
-from ycappuccino_core.decorator_app import App
+from src.main.python.models.decorators import Item, Reference, ItemReference, Empty
+from ycappuccino_storage import Model
+from src.main.python.decorator_app import App
+
 """
     model that describe link between role and account
 """
+
+
 @Empty()
 def empty():
     _empty = RoleAccount()
@@ -13,11 +16,18 @@ def empty():
     _empty.organization("test")
     return _empty
 
+
 @App(name="ycappuccino_permissions")
-@Item(collection="roleAccounts", name="roleAccount", plural="role-accounts", secure_write=True, secure_read=True)
+@Item(
+    collection="roleAccounts",
+    name="roleAccount",
+    plural="role-accounts",
+    secure_write=True,
+    secure_read=True,
+)
 @ItemReference(from_name="roleAccounts", field="account", item="account")
-@ItemReference(from_name="roleAccounts",field="role", item="role")
-@ItemReference(from_name="roleAccounts",field="organization", item="organization")
+@ItemReference(from_name="roleAccounts", field="role", item="role")
+@ItemReference(from_name="roleAccounts", field="organization", item="organization")
 class RoleAccount(Model):
     def __init__(self, a_dict=None):
         super().__init__(a_dict)
@@ -31,12 +41,13 @@ class RoleAccount(Model):
 
     @Reference(name="account")
     def account(self, a_values):
-        """ list of right permission """
+        """list of right permission"""
         self._account = a_values
 
     @Reference(name="organization")
     def organization(self, a_organization):
-        """ list of right permission """
+        """list of right permission"""
         self._organization = a_organization
+
 
 empty()

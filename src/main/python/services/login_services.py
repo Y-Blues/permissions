@@ -1,4 +1,4 @@
-#app="all"
+# app="all"
 """
     login service regarding account, login stored in database.
 
@@ -6,14 +6,21 @@
 import json
 
 from ycappuccino_api.core.api import IActivityLogger, IService
-from ycappuccino_api.proxy.api import YCappuccinoRemote
+from src.main.python.proxy import YCappuccinoRemote
 from ycappuccino_api.storage.api import IManager
 from ycappuccino_api.endpoints.api import IRightManager
 from ycappuccino_api.permissions.api import ILoginService
-from ycappuccino_core.decorator_app import Layer
+from src.main.python.decorator_app import Layer
 
 import logging
-from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
+from pelix.ipopo.decorators import (
+    ComponentFactory,
+    Requires,
+    Validate,
+    Invalidate,
+    Provides,
+    Instantiate,
+)
 import hashlib
 
 
@@ -24,18 +31,15 @@ _logger = logging.getLogger(__name__)
 class AbsService(IService, ILoginService):
 
     def __init__(self):
-        super(IService, self).__init__();
+        super(IService, self).__init__()
         self._manager_login = None
         self._manager_account = None
         self._manager_role_account = None
         self._log = None
         self._right_access = None
 
-
-
-
     def change_password(self, a_login, a_password, a_new_password):
-        """ return tuple of 2 element that admit a dictionnary of header and a body"""
+        """return tuple of 2 element that admit a dictionnary of header and a body"""
         self._log.info("change password")
 
         w_login = self._manager_login.get_one("login", a_login)
@@ -51,31 +55,41 @@ class AbsService(IService, ILoginService):
 
         return None
 
-
     def check_login(self, a_login, a_password):
-        """ return tuple of 2 element that admit a dictionnary of header and a body"""
-        w_login = self._manager_login.get_one("login",  a_login)
+        """return tuple of 2 element that admit a dictionnary of header and a body"""
+        w_login = self._manager_login.get_one("login", a_login)
 
-        w_filter = json.dumps({"login.ref":w_login._id})
-        w_account = self._manager_account.get_many( "account", a_params={"filter":w_filter})
-        if w_account is not None and len(w_account)>0:
-            w_filter = json.dumps({"account.ref":w_account[0]._id})
+        w_filter = json.dumps({"login.ref": w_login._id})
+        w_account = self._manager_account.get_many(
+            "account", a_params={"filter": w_filter}
+        )
+        if w_account is not None and len(w_account) > 0:
+            w_filter = json.dumps({"account.ref": w_account[0]._id})
 
-            w_role_account = self._manager_role_account.get_many( "roleAccount", a_params={"filter":w_filter})
-            w_filter = json.dumps({"role.ref":w_role_account[0]._id})
+            w_role_account = self._manager_role_account.get_many(
+                "roleAccount", a_params={"filter": w_filter}
+            )
+            w_filter = json.dumps({"role.ref": w_role_account[0]._id})
 
-            w_role_permissions = self._manager_role_account.get_many( "rolePermission", a_params={"filter":w_filter})
+            w_role_permissions = self._manager_role_account.get_many(
+                "rolePermission", a_params={"filter": w_filter}
+            )
 
             w_concat = "{}{}".format(w_login._salt, a_password).encode("utf-8")
             result = hashlib.md5(w_concat).hexdigest()
 
             if w_login._password == result:
-                w_token = self._right_access.generate(w_account[0], w_role_account[0], w_role_permissions)
+                w_token = self._right_access.generate(
+                    w_account[0], w_role_account[0], w_role_permissions
+                )
                 return w_token
         return None
 
-@ComponentFactory('LoginService-Factory')
-@Provides(specifications=[YCappuccinoRemote.__name__, IService.name,ILoginService.__name__])
+
+@ComponentFactory("LoginService-Factory")
+@Provides(
+    specifications=[YCappuccinoRemote.__name__, IService.name, ILoginService.__name__]
+)
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
@@ -85,7 +99,7 @@ class AbsService(IService, ILoginService):
 class LoginService(AbsService):
 
     def __init__(self):
-        super(LoginService, self).__init__();
+        super(LoginService, self).__init__()
         self._manager_login = None
         self._log = None
 
@@ -96,15 +110,12 @@ class LoginService(AbsService):
         return False
 
     def post(self, a_header, a_url_path, a_body):
-        """ return tuple of 2 element that admit a dictionnary of header and a body"""
+        """return tuple of 2 element that admit a dictionnary of header and a body"""
 
         w_token = self.check_login(a_body["login"], a_body["password"])
         if w_token is not None:
-            return {},{
-                "token": w_token
-            }
+            return {}, {"token": w_token}
         return None, None
-
 
     def get(self, a_header, a_url_path):
         return self.post(a_header, a_url_path, None)
@@ -125,10 +136,10 @@ class LoginService(AbsService):
         self._log.info("LoginService invalidated")
 
 
-
-
-@ComponentFactory('ChangePasswordService-Factory')
-@Provides(specifications=[YCappuccinoRemote.name, IService.name,ILoginService.__name__])
+@ComponentFactory("ChangePasswordService-Factory")
+@Provides(
+    specifications=[YCappuccinoRemote.name, IService.name, ILoginService.__name__]
+)
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Instantiate("ChangePasswordService")
@@ -136,31 +147,28 @@ class LoginService(AbsService):
 class ChangePasswordService(AbsService):
 
     def __init__(self):
-        super(ChangePasswordService, self).__init__();
+        super(ChangePasswordService, self).__init__()
         self._manager_login = None
         self._log = None
 
-
     def is_secure(self):
         return True
-
 
     def get_name(self):
         return "change_password"
 
     def post(self, a_header, a_url_path, a_body):
-        """ return tuple of 2 element that admit a dictionnary of header and a body"""
+        """return tuple of 2 element that admit a dictionnary of header and a body"""
         self._log.info("post change password")
 
-        w_new = self.change_password(a_body["login"], a_body["password"], a_body["new_password"])
+        w_new = self.change_password(
+            a_body["login"], a_body["password"], a_body["new_password"]
+        )
         if w_new is not None:
-            return {}, {
-                "login": a_body
-            }
+            return {}, {"login": a_body}
 
         self._log.info("post change password failed")
         return None, None
-
 
     def put(self, a_header, a_url_path, a_body):
         return None
@@ -184,8 +192,10 @@ class ChangePasswordService(AbsService):
         self._log.info("ChangePasswordService invalidated")
 
 
-@ComponentFactory('LoginCookieService-Factory')
-@Provides(specifications=[YCappuccinoRemote.name, IService.name,ILoginService.__name__])
+@ComponentFactory("LoginCookieService-Factory")
+@Provides(
+    specifications=[YCappuccinoRemote.name, IService.name, ILoginService.__name__]
+)
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
@@ -195,7 +205,7 @@ class ChangePasswordService(AbsService):
 class LoginCookieService(AbsService):
 
     def __init__(self):
-        super(LoginCookieService, self).__init__();
+        super(LoginCookieService, self).__init__()
         self._manager_login = None
         self._log = None
 
@@ -206,17 +216,14 @@ class LoginCookieService(AbsService):
         return "login"
 
     def post(self, a_header, a_url_path, a_body):
-        """ return tuple of 2 element that admit a dictionnary of header and a body"""
+        """return tuple of 2 element that admit a dictionnary of header and a body"""
 
         w_token = self.check_login(a_body["login"], a_body["password"])
         if w_token is not None:
-            return {
-              "Set-Cookie": "_ycappuccino="+w_token+";Path=/;HttpOnly"
-            }, {
-                "token":w_token
+            return {"Set-Cookie": "_ycappuccino=" + w_token + ";Path=/;HttpOnly"}, {
+                "token": w_token
             }
         return None, None
-
 
     def put(self, a_header, a_url_path, a_body):
         return None

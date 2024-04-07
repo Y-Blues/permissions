@@ -1,12 +1,15 @@
-from ycappuccino_core.models.decorators  import Item, Property, Empty
-from ycappuccino_storage.models.model import Model
-from ycappuccino_core.decorator_app import App
+from src.main.python.models.decorators import Item, Property, Empty
+from ycappuccino_storage import Model
+from src.main.python.decorator_app import App
 
 import hashlib
 import os
+
 """
     model that decribe a login 
 """
+
+
 @Empty()
 def empty():
     _empty = Login()
@@ -14,8 +17,15 @@ def empty():
     _empty.password("client_pyscript_core")
     return _empty
 
+
 @App(name="ycappuccino_permissions")
-@Item(collection="logins",name="login", plural="logins",  secure_write=True, secure_read=True)
+@Item(
+    collection="logins",
+    name="login",
+    plural="logins",
+    secure_write=True,
+    secure_read=True,
+)
 class Login(Model):
     def __init__(self, a_dict=None):
         super().__init__(a_dict)
@@ -23,8 +33,6 @@ class Login(Model):
         self._salt = None
         self._login = None
         self._account_ref = None
-
-
 
     @Property(name="login")
     def login(self, a_value):
@@ -42,8 +50,6 @@ class Login(Model):
         self.salt(os.urandom(32).hex())
         w_concat = "{}{}".format(self._salt, a_value).encode("utf-8")
         self._private_password(hashlib.md5(w_concat).hexdigest())
-
-
 
 
 empty()

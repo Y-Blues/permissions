@@ -2,54 +2,66 @@
  Service that allow to create jwt access and verify access if server is the IDP
 """
 
-from ycappuccino_api.core.api import IActivityLogger,  IConfiguration
-from ycappuccino_api.proxy.api import YCappuccinoRemote
-from ycappuccino_core.executor_service import ThreadPoolExecutorCallable, RunnableProcess
+from ycappuccino_api.core.api import IActivityLogger, IConfiguration
+from src.main.python.proxy import YCappuccinoRemote
+from ycappuccino_core import ThreadPoolExecutorCallable, RunnableProcess
 from ycappuccino_api.endpoints.api import IRightManager
-from ycappuccino_core.decorator_app import Layer
+from src.main.python.decorator_app import Layer
 import re
 import logging
-from pelix.ipopo.decorators import ComponentFactory, Requires, Validate, Invalidate, Provides, Instantiate
+from pelix.ipopo.decorators import (
+    ComponentFactory,
+    Requires,
+    Validate,
+    Invalidate,
+    Provides,
+    Instantiate,
+)
 import time
 
 _logger = logging.getLogger(__name__)
 
 import jwt
 
-TIMEOUT = 15*60*1000
+TIMEOUT = 15 * 60 * 1000
 
-KEY = 'YCap'
+KEY = "YCap"
 
 
 class PurgeToken(RunnableProcess):
     def __init__(self, a_service, a_log):
         super(PurgeToken, self).__init__("PurgeToken", a_log)
         self._jwt = a_service
+
     def process(self):
-        """ abstract run class"""
+        """abstract run class"""
         w_to_delete = []
         for w_token_decoded_key in self._jwt.get_tokens_decoded().keys():
             w_token_decoded = self._jwt.get_token_decoded(w_token_decoded_key)
-            seconds = int(round(time.time() ))
-            if w_token_decoded is not None and "exp" in w_token_decoded and w_token_decoded["exp"] > seconds:
+            seconds = int(round(time.time()))
+            if (
+                w_token_decoded is not None
+                and "exp" in w_token_decoded
+                and w_token_decoded["exp"] > seconds
+            ):
                 pass
             else:
                 w_to_delete.append(w_token_decoded_key)
 
-        for w_token_decoded_key in  w_to_delete:
+        for w_token_decoded_key in w_to_delete:
             self._jwt.delete_token_decoded(w_token_decoded_key)
 
 
-@ComponentFactory('Jwt-Factory')
+@ComponentFactory("Jwt-Factory")
 @Provides(specifications=[YCappuccinoRemote.__name__, IRightManager.__name__])
-@Requires("_log",IActivityLogger.name, spec_filter="'(name=main)'")
-@Requires("_config",IConfiguration.__name__)
+@Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
+@Requires("_config", IConfiguration.__name__)
 @Instantiate("jwt")
 @Layer(name="ycappuccino_permissions")
 class Jwt(IRightManager):
 
     def __init__(self):
-        super(Jwt, self).__init__();
+        super(Jwt, self).__init__()
         self._log = None
         self._key = None
         self._config = None
@@ -69,39 +81,43 @@ class Jwt(IRightManager):
     def get_token_decoded(self, a_token):
         if a_token not in self._token_decoded.keys():
             self.verify(a_token)
-        if a_token  in self._token_decoded.keys():
+        if a_token in self._token_decoded.keys():
             return self._token_decoded[a_token]
-        return  None
-
+        return None
 
     def delete_token_decoded(self, a_token):
         del self._token_decoded[a_token]
 
-    def generate(self,account, role_account, role_permissions):
+    def generate(self, account, role_account, role_permissions):
         # tody manage right / account / tenant
         seconds = int(round(time.time()))
-        exp = int(round(time.time()))+self._timeout
+        exp = int(round(time.time())) + self._timeout
         w_token_decode = {
-            'sub': account._id,
+            "sub": account._id,
             "tid": role_account._organization["ref"],
             "iat": seconds,
-            "exp" : exp,
-            "permissions": role_permissions[0]._dict["permissions"]
+            "exp": exp,
+            "permissions": role_permissions[0]._dict["permissions"],
         }
-        w_token = jwt.encode(w_token_decode, self._key, algorithm='HS256')
-
+        w_token = jwt.encode(w_token_decode, self._key, algorithm="HS256")
 
         self._token_decoded[w_token] = w_token_decode
         return w_token
 
     def is_authorized(self, a_token, a_url_path):
-        """ return true if it's authorized, else false"""
+        """return true if it's authorized, else false"""
 
-        w_action = ":".join([ a_url_path.get_method(), a_url_path.get_url_no_query(), a_url_path.get_url_query() ])
+        w_action = ":".join(
+            [
+                a_url_path.get_method(),
+                a_url_path.get_url_no_query(),
+                a_url_path.get_url_query(),
+            ]
+        )
         w_token_decoded = self.get_token_decoded(a_token)
         if "permissions" in w_token_decoded.keys():
-            for w_perm in  w_token_decoded["permissions"]:
-                if re.search(w_perm.replace("*",".*"), w_action) :
+            for w_perm in w_token_decoded["permissions"]:
+                if re.search(w_perm.replace("*", ".*"), w_action):
                     return True
 
         return False
@@ -109,7 +125,7 @@ class Jwt(IRightManager):
     def verify(self, a_token):
         if a_token is not None:
             try:
-                w_res = jwt.decode(a_token, self._key, algorithms='HS256')
+                w_res = jwt.decode(a_token, self._key, algorithms="HS256")
                 seconds = int(round(time.time()))
                 if w_res is not None and "exp" in w_res and w_res["exp"] > seconds:
                     self._token_decoded[a_token] = w_res
