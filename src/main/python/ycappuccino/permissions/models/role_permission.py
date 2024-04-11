@@ -1,12 +1,6 @@
-from src.main.python.models.decorators import (
-    Item,
-    Reference,
-    ItemReference,
-    Empty,
-    Property,
-)
-from ycappuccino_storage import Model
-from src.main.python.decorator_app import App
+from ycappuccino.core.models.decorators import Item, Property, Empty, ItemReference
+from ycappuccino.storage.models.model import Model
+from ycappuccino.core.decorator_app import App
 
 """
     model that describe link between role and permissions
