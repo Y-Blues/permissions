@@ -5,12 +5,12 @@
 """
 import json
 
-from ycappuccino_api.core.api import IActivityLogger, IService
-from src.main.python.proxy import YCappuccinoRemote
-from ycappuccino_api.storage.api import IManager
-from ycappuccino_api.endpoints.api import IRightManager
-from ycappuccino_api.permissions.api import ILoginService
-from src.main.python.decorator_app import Layer
+from ycappuccino.api.core.api import IActivityLogger, IService
+from ycappuccino.api.proxy.api import YCappuccinoRemote
+from ycappuccino.api.storage.api import IManager
+from ycappuccino.api.endpoints.api import IRightManager
+from ycappuccino.api.permissions.api import ILoginService
+from ycappuccino.core.decorator_app import Layer
 
 import logging
 from pelix.ipopo.decorators import (

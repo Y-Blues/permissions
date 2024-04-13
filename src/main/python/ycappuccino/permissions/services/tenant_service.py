@@ -3,10 +3,10 @@
 
 """
 
-from ycappuccino_api.core.api import IActivityLogger
-from src.main.python.proxy import YCappuccinoRemote
-from ycappuccino_api.storage.api import IManager
-from src.main.python.decorator_app import Layer
+from ycappuccino.api.core.api import IActivityLogger
+from ycappuccino.api.proxy.api import YCappuccinoRemote
+from ycappuccino.api.storage.api import IManager
+from ycappuccino.core.decorator_app import Layer
 
 import logging
 from pelix.ipopo.decorators import (
@@ -18,14 +18,14 @@ from pelix.ipopo.decorators import (
     Instantiate,
 )
 
-from ycappuccino_api.permissions.api import ITenantTrigger
-from ycappuccino_api.storage.api import ITrigger, IFilter
+from ycappuccino.api.permissions.api import ITenantTrigger
+from ycappuccino.api.storage.api import ITrigger, IFilter
 
-from ycappuccino.permissions.models import YDict
+from ycappuccino.core.models.utils import YDict
 
-from ycappuccino_permissions import Organization
+from ycappuccino.permissions.models.organization import Organization
 
-from ycappuccino_storage import Model
+from ycappuccino.storage.models.model import Model
 
 _logger = logging.getLogger(__name__)
 
