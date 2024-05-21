@@ -2,13 +2,10 @@
  Service that allow to create jwt access and verify access if server is the IDP
 """
 
-from ycappuccino.api.core.api import IActivityLogger, IConfiguration
-from ycappuccino.api.proxy.api import YCappuccinoRemote
-from ycappuccino.core.executor_service import (
-    ThreadPoolExecutorCallable,
-    RunnableProcess,
-)
-from ycappuccino.api.endpoints.api import IRightManager
+from ycappuccino.api.core import IActivityLogger, IConfiguration
+from ycappuccino.api.proxy import YCappuccinoRemote
+
+from ycappuccino.api.endpoints import IRightManager
 from ycappuccino.core.decorator_app import Layer
 import re
 import logging
@@ -21,6 +18,11 @@ from pelix.ipopo.decorators import (
     Instantiate,
 )
 import time
+
+from ycappuccino.core.executor_service import (
+    RunnableProcess,
+    ThreadPoolExecutorCallable,
+)
 
 _logger = logging.getLogger(__name__)
 

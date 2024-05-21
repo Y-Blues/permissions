@@ -1,12 +1,7 @@
-from ycappuccino.permissions.models import (
-    Item,
-    Property,
-    Empty,
-    ItemReference,
-    Reference,
-)
-from ycappuccino_storage import Model
-from src.main.python.decorator_app import App
+from ycappuccino.core.decorator_app import App
+
+from ycappuccino.api.decorators import Item, ItemReference, Empty, Property, Reference
+from ycappuccino.api.models import Model
 
 
 """

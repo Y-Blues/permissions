@@ -5,11 +5,11 @@
 """
 import json
 
-from ycappuccino.api.core.api import IActivityLogger, IService
-from ycappuccino.api.proxy.api import YCappuccinoRemote
-from ycappuccino.api.storage.api import IManager
-from ycappuccino.api.endpoints.api import IRightManager
-from ycappuccino.api.permissions.api import ILoginService
+from ycappuccino.api.core import IActivityLogger, IService
+from ycappuccino.api.proxy import YCappuccinoRemote
+from ycappuccino.api.storage import IManager
+from ycappuccino.api.endpoints import IRightManager
+from ycappuccino.api.permissions import ILoginService
 from ycappuccino.core.decorator_app import Layer
 
 import logging

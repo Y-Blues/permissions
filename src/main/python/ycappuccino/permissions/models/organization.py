@@ -1,6 +1,7 @@
-from ycappuccino.core.models.decorators import Item, Property, Empty
-from ycappuccino.storage.models.model import Model
 from ycappuccino.core.decorator_app import App
+
+from ycappuccino.api.decorators import Item, ItemReference, Empty, Property, Reference
+from ycappuccino.api.models import Model
 
 """
     model that decribe a organisation
