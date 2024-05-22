@@ -16,7 +16,7 @@ def empty():
     return _empty
 
 
-@App(name="ycappuccino_permissions")
+@App(name="ycappuccino-permissions")
 @Item(
     collection="roles", name="role", plural="roles", secure_write=True, secure_read=True
 )

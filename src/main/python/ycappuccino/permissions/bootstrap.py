@@ -4,9 +4,9 @@
 
 """
 
-from ycappuccino.api.core.api import IActivityLogger
-from ycappuccino.api.proxy.api import YCappuccinoRemote
-from ycappuccino.api.storage.api import IManager, IBootStrap
+from ycappuccino.api.core import IActivityLogger
+from ycappuccino.api.proxy import YCappuccinoRemote
+from ycappuccino.api.storage import IManager, IBootStrap
 from ycappuccino.core.decorator_app import Layer
 
 import logging
@@ -21,10 +21,10 @@ from pelix.ipopo.decorators import (
 )
 
 from ycappuccino.permissions.models.account import Account
-from ycappuccino_permissions.models.login import Login
-from ycappuccino_permissions.models.role import Role
-from ycappuccino_permissions.models.role_permission import RolePermission
-from ycappuccino_permissions.models.role_account import RoleAccount
+from ycappuccino.permissions.models.login import Login
+from ycappuccino.permissions.models.role import Role
+from ycappuccino.permissions.models.role_permission import RolePermission
+from ycappuccino.permissions.models.role_account import RoleAccount
 
 
 _logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ _logger = logging.getLogger(__name__)
 @Requires("_manager_role", IManager.__name__, spec_filter="'(item_id=role)'")
 @Property("_id", "id", "core")
 @Instantiate("AccountBootStrap")
-@Layer(name="ycappuccino_permissions")
+@Layer(name="ycappuccino-permissions")
 class AccountBootStrap(IBootStrap):
 
     def __init__(self):

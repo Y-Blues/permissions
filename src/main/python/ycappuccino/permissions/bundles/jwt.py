@@ -62,7 +62,7 @@ class PurgeToken(RunnableProcess):
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_config", IConfiguration.__name__)
 @Instantiate("jwt")
-@Layer(name="ycappuccino_permissions")
+@Layer(name="ycappuccino-permissions")
 class Jwt(IRightManager):
 
     def __init__(self):

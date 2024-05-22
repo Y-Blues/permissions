@@ -43,7 +43,7 @@ _logger = logging.getLogger(__name__)
     "_organization_manager", IManager.name, spec_filter="'(item_id=organization)'"
 )
 @Instantiate("TenantTrigger")
-@Layer(name="ycappuccino.rest-app")
+@Layer(name="ycappuccino-permissions")
 class TenantTrigger(ITrigger, IFilter):
 
     def __init__(self):

@@ -95,7 +95,7 @@ class AbsService(IService, ILoginService):
 @Requires("_manager_account", IManager.name, spec_filter="'(item_id=account)'")
 @Requires("_manager_role_account", IManager.name, spec_filter="'(item_id=roleAccount)'")
 @Instantiate("LoginService")
-@Layer(name="ycappuccino_permissions")
+@Layer(name="ycappuccino-permissions")
 class LoginService(AbsService):
 
     def __init__(self):
@@ -143,7 +143,7 @@ class LoginService(AbsService):
 @Requires("_log", IActivityLogger.name, spec_filter="'(name=main)'")
 @Requires("_manager_login", IManager.name, spec_filter="'(item_id=login)'")
 @Instantiate("ChangePasswordService")
-@Layer(name="ycappuccino_permissions")
+@Layer(name="ycappuccino-permissions")
 class ChangePasswordService(AbsService):
 
     def __init__(self):

@@ -20,7 +20,7 @@ def empty():
     return _empty
 
 
-@App(name="ycappuccino_permissions")
+@App(name="ycappuccino-permissions")
 @Item(
     collection="accounts",
     name="account",
